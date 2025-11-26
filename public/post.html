@@ -7,6 +7,11 @@
     <script>
       function fnSearch() {
         const token = localStorage.getItem("token");
+        if (!token) {
+          alert("로그인이 필요합니다.");
+          location.href = "login.html";
+          return;
+        }
         fetch("http://127.0.0.1:8080/post", {
           method: "GET",
           headers: {
