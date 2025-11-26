@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      function fnSearch() {
+        const token = localStorage.getItem("token");
+        fetch("http://127.0.0.1:8080/post", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(JSON.stringify(data, null, 2));
+          })
+          .catch((error) => {
+            console.error("에러 발생:", error);
+          });
+      }
+    </script>
+  </head>
+
+  <body onload="fnSearch()"></body>
+</html>

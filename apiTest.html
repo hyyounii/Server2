@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      function loadData() {
+        const START_INDEX = document.getElementById("START_INDEX").value;
+        const END_INDEX = document.getElementById("END_INDEX").value;
+        const stationId = document.getElementById("stationId").value;
+        let url = `http://openapi.seoul.go.kr:8088/545962574168797934366b5859415a/json/bikeList/${START_INDEX}/${END_INDEX}/`;
+        if (stationId !== "") {
+          url += stationId;
+        }
+
+        console.log(url);
+        fetch(url)
+          .then((response) => response.json()) // 응답을 JSON으로 변환
+          .then((data) => {
+            debugger;
+            console.log(JSON.stringify(data, null, 2)); // 변환된 데이터 사용
+            if (data.CODE == "INFO-200") {
+              document.getElementById("info").innerText = data.MESSAGE;
+              return false;
+            }
+            station = "";
+            rows = data.rentBikeStatus.row;
+            for (let i = 0; i < rows.length; i++) {
+              // alert(rows[i].stationName);
+              station +=
+                "<strong>순번:</strong>" +
+                (i + 1) +
+                "<br>" +
+                "<strong>거치대 개수:</strong>" +
+                rows[i].rackTotCnt +
+                "<br>" +
+                "<strong>대여소 이름:</strong>" +
+                rows[i].stationName +
+                "<br>" +
+                "<strong>자전거 주차 총 건수:</strong>" +
+                rows[i].parkingBikeTotCnt +
+                "<br>" +
+                "<strong>거치율:</strong>" +
+                rows[i].shared +
+                "<br>" +
+                "<strong>위도:</strong>" +
+                rows[i].stationLatitude +
+                "<br>" +
+                "<strong>경도:</strong>" +
+                rows[i].stationLongitude +
+                "<br>" +
+                "<strong>거치대 ID:</strong>" +
+                rows[i].stationId +
+                "<br><hr>";
+              document.getElementById("info").innerHTML = station;
+            }
+          })
+          .catch((error) => {
+            // console.error("에러 발생:", error);
+          });
+      }
+    </script>
+  </head>
+  <body>
+    <p>요청시작위치(1이상)<input type="text" id="START_INDEX" value="1" /></p>
+    <p>요청종료위치(1000이하)<input type="text" id="END_INDEX" value="2" /></p>
+    <p>대여소 id<input type="text" id="stationId" /></p>
+    <button onclick="loadData()">대여소 조회하기</button>
+    <div id="info"></div>
+  </body>
+</html>

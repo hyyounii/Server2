@@ -1,0 +1,74 @@
+/* 전체 페이지 */
+body {
+  font-family: "Noto Sans KR", sans-serif;
+  background: #fafafa;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px; /* 화면 상단에서 조금 내려오게 */
+  margin: 0;
+}
+
+/* 각 input 박스를 감싼 p 태그 */
+p {
+  width: 400px; /* 지금보다 살짝 짧게 */
+  background: #ffffff;
+  padding: 22px 24px;
+  border-radius: 16px;
+  margin: 8px auto; /* 간격 0.2cm 정도 */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f2f2f2;
+
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 500;
+  color: #222;
+}
+
+/* input 스타일 */
+input[type="text"],
+input[type="password"] {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #fcfcfc;
+  transition: all 0.2s ease;
+}
+
+input:focus {
+  border-color: #000;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.07);
+  outline: none;
+}
+
+/* 버튼 */
+button {
+  width: 480px; /* 입력칸 너비와 동일하게 */
+  padding: 14px;
+  background: #111;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 12px auto 0 auto; /* 가운데 정렬 */
+  display: block;
+
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: #000;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
