@@ -3,15 +3,46 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>포스트 목록</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body onload="fnSearch()">
+    <div class="header">
+      <h2>포스트 목록</h2>
+      <div class="header-right">
+        <div class="search-box">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="작성자 ID로 검색..."
+            onkeypress="if(event.key==='Enter') searchByUserId()"
+          />
+          <button onclick="searchByUserId()" class="search-btn">검색</button>
+          <button onclick="resetSearch()" class="reset-btn">전체보기</button>
+        </div>
+        <button id="writeBtn" class="write-btn">글 쓰기</button>
+      </div>
+    </div>
+    <div id="postList">불러오는 중...</div>
+
     <script>
+      // 글쓰기 버튼 클릭
+      document
+        .getElementById("writeBtn")
+        .addEventListener("click", function () {
+          location.href = "write.html";
+        });
+
+      // 전체 포스트 불러오기
       function fnSearch() {
         const token = localStorage.getItem("token");
+
         if (!token) {
           alert("로그인이 필요합니다.");
           location.href = "login.html";
           return;
         }
+
         fetch("http://127.0.0.1:8080/post", {
           method: "GET",
           headers: {
@@ -21,14 +52,118 @@
         })
           .then((response) => response.json())
           .then((data) => {
-            console.log(JSON.stringify(data, null, 2));
+            displayPosts(data);
           })
           .catch((error) => {
-            console.error("에러 발생:", error);
+            console.error("포스트 불러오기 에러:", error);
+            document.getElementById("postList").innerText =
+              "포스트를 불러오는 중 오류가 발생했습니다.";
           });
       }
-    </script>
-  </head>
 
-  <body onload="fnSearch()"></body>
+      // 특정 사용자 ID로 검색
+      function searchByUserId() {
+        const searchValue = document.getElementById("searchInput").value.trim();
+
+        if (!searchValue) {
+          alert("검색할 사용자 ID를 입력해주세요.");
+          return;
+        }
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          alert("로그인이 필요합니다.");
+          location.href = "login.html";
+          return;
+        }
+
+        // API 호출: GET /post?userid=검색어 (쿼리 파라미터 방식)
+        // 또는 GET /post/user/:userid (경로 파라미터 방식)
+        // 서버 API 구조에 맞게 선택하세요
+
+        fetch(`http://127.0.0.1:8080/post?userid=${searchValue}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            displayPosts(data, searchValue);
+          })
+          .catch((error) => {
+            console.error("검색 에러:", error);
+            document.getElementById("postList").innerText =
+              "검색 중 오류가 발생했습니다.";
+          });
+      }
+
+      // 검색 초기화 (전체보기)
+      function resetSearch() {
+        document.getElementById("searchInput").value = "";
+        fnSearch();
+      }
+
+      // 포스트 표시 함수
+      function displayPosts(data, searchUserId = null) {
+        const postsArray = Array.isArray(data) ? data : data.posts;
+
+        if (!postsArray || postsArray.length === 0) {
+          if (searchUserId) {
+            document.getElementById(
+              "postList"
+            ).innerText = `'${searchUserId}' 사용자의 포스트가 없습니다.`;
+          } else {
+            document.getElementById("postList").innerText =
+              "포스트가 없습니다.";
+          }
+          return;
+        }
+
+        let html = "";
+
+        if (searchUserId) {
+          html += `<div style="margin-bottom: 20px; padding: 15px; background-color: #e7f3ff; border-radius: 8px;">
+                    <strong>검색 결과:</strong> '${searchUserId}' 사용자의 포스트 ${postsArray.length}개
+                   </div>`;
+        }
+
+        for (let i = 0; i < postsArray.length; i++) {
+          const post = postsArray[i];
+          const postId = post.id || post._id || i;
+          html +=
+            "<div>" +
+            "<img src='" +
+            (post.url || "https://via.placeholder.com/50") +
+            "' alt='프로필' width='50'><br>" +
+            "<br>" +
+            "<strong>작성자:</strong> " +
+            (post.name || "") +
+            " (" +
+            (post.userid || "") +
+            ")<br>" +
+            "<strong>내용:</strong> " +
+            (post.text || "") +
+            "<br>" +
+            "<strong>작성일:</strong> " +
+            (post.createdAt ? new Date(post.createdAt).toLocaleString() : "") +
+            "<br>" +
+            "<button onclick=\"goToDetail('" +
+            postId +
+            "')\">글 상세</button>" +
+            "<br><hr>" +
+            "</div>";
+        }
+
+        document.getElementById("postList").innerHTML = html;
+      }
+
+      // 상세 페이지로 이동하는 함수
+      function goToDetail(postId) {
+        location.href = "detail.html?id=" + postId;
+      }
+    </script>
+  </body>
 </html>

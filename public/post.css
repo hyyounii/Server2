@@ -1,0 +1,53 @@
+/* header: 제목 + 버튼 한 줄로 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.write-btn {
+  padding: 6px 12px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.write-btn:hover {
+  background-color: #45a049;
+}
+
+/* 포스트 목록 컨테이너 */
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 각 포스트 카드 */
+.post-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  gap: 10px;
+}
+
+/* 프로필 이미지 */
+.profile-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 글 내용 */
+.post-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

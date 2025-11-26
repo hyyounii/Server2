@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>글 상세보기</title>
+    <link rel="stylesheet" href="./detail.css" />
+  </head>
+  <body onload="loadPostDetail()">
+    <div class="container">
+      <div class="header">
+        <h2>글 상세보기</h2>
+        <button onclick="location.href='post.html'" class="back-btn">
+          목록으로
+        </button>
+      </div>
+
+      <div id="postDetail">
+        <p>불러오는 중...</p>
+      </div>
+
+      <div id="editForm" style="display: none">
+        <div class="form-group">
+          <label for="editContent">내용 수정</label>
+          <textarea id="editContent" rows="10"></textarea>
+        </div>
+        <div class="button-group">
+          <button onclick="saveEdit()" class="submit-btn">수정 완료</button>
+          <button onclick="cancelEdit()" class="cancel-btn">취소</button>
+        </div>
+      </div>
+
+      <div
+        id="actionButtons"
+        style="margin-top: 30px; text-align: right; display: none"
+      >
+        <button onclick="showEditForm()" class="edit-btn">글 수정</button>
+        <button onclick="deletePost()" class="delete-btn">글 삭제</button>
+      </div>
+    </div>
+
+    <script>
+      let currentPostId = null;
+      let currentPostData = null;
+
+      function loadPostDetail() {
+        // URL에서 id 파라미터 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get("id");
+        currentPostId = postId;
+
+        if (!postId) {
+          document.getElementById("postDetail").innerHTML =
+            '<p style="color: red;">잘못된 접근입니다.</p>';
+          return;
+        }
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          alert("로그인이 필요합니다.");
+          location.href = "login.html";
+          return;
+        }
+
+        // API 호출: GET /post/:id
+        fetch(`http://127.0.0.1:8080/post/${postId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("포스트를 찾을 수 없습니다.");
+            }
+            return response.json();
+          })
+          .then((post) => {
+            currentPostData = post;
+            displayPost(post);
+          })
+          .catch((error) => {
+            console.error("포스트 불러오기 에러:", error);
+            document.getElementById("postDetail").innerHTML =
+              '<p style="color: red;">포스트를 불러오는 중 오류가 발생했습니다.</p>';
+          });
+      }
+
+      function displayPost(post) {
+        const detailHTML = `
+          <div class="post-detail-card">
+            <div class="post-header">
+              <img src="${post.url || "https://via.placeholder.com/80"}" 
+                   alt="프로필" class="profile-img">
+              <div class="post-author">
+                <h3>${post.name || "익명"}</h3>
+                <p class="userid">@${post.userid || "unknown"}</p>
+                <p class="date">${
+                  post.createdAt
+                    ? new Date(post.createdAt).toLocaleString()
+                    : ""
+                }</p>
+              </div>
+            </div>
+            <div class="post-content">
+              <p>${post.text || ""}</p>
+            </div>
+          </div>
+        `;
+
+        document.getElementById("postDetail").innerHTML = detailHTML;
+        document.getElementById("postDetail").style.display = "block";
+        document.getElementById("editForm").style.display = "none";
+
+        // 수정, 삭제 버튼 표시
+        document.getElementById("actionButtons").style.display = "block";
+      }
+
+      function showEditForm() {
+        // 수정 폼 표시
+        document.getElementById("editContent").value =
+          currentPostData.text || "";
+        document.getElementById("postDetail").style.display = "none";
+        document.getElementById("editForm").style.display = "block";
+        document.getElementById("actionButtons").style.display = "none";
+      }
+
+      function cancelEdit() {
+        // 수정 취소
+        document.getElementById("postDetail").style.display = "block";
+        document.getElementById("editForm").style.display = "none";
+        document.getElementById("actionButtons").style.display = "block";
+      }
+
+      function saveEdit() {
+        const newText = document.getElementById("editContent").value;
+
+        if (!newText.trim()) {
+          alert("내용을 입력해주세요.");
+          return;
+        }
+
+        const token = localStorage.getItem("token");
+
+        // API 호출: PUT /post/:id (또는 PATCH)
+        fetch(`http://127.0.0.1:8080/post/${currentPostId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            text: newText,
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("수정에 실패했습니다.");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            alert("글이 수정되었습니다!");
+            location.href = "post.html";
+          })
+          .catch((error) => {
+            console.error("수정 에러:", error);
+            alert("글 수정 중 오류가 발생했습니다.");
+          });
+      }
+
+      function deletePost() {
+        if (!confirm("정말로 이 글을 삭제하시겠습니까?")) {
+          return;
+        }
+
+        const token = localStorage.getItem("token");
+
+        fetch(`http://127.0.0.1:8080/post/${currentPostId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("삭제에 실패했습니다.");
+            }
+            alert("글이 삭제되었습니다.");
+            location.href = "post.html";
+          })
+          .catch((error) => {
+            console.error("삭제 에러:", error);
+            alert("글 삭제 중 오류가 발생했습니다.");
+          });
+      }
+    </script>
+  </body>
+</html>

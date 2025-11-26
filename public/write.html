@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>글 쓰기</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>새 글 작성</h2>
+        <button onclick="location.href='post.html'" class="back-btn">
+          목록으로
+        </button>
+      </div>
+
+      <form id="writeForm">
+        <div class="form-group">
+          <label for="content">내용 *</label>
+          <textarea
+            id="content"
+            rows="10"
+            placeholder="내용을 입력하세요"
+            required
+          ></textarea>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="submit-btn">작성 완료</button>
+          <button
+            type="button"
+            onclick="location.href='post.html'"
+            class="cancel-btn"
+          >
+            취소
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      document
+        .getElementById("writeForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const token = localStorage.getItem("token");
+          if (!token) {
+            alert("로그인이 필요합니다.");
+            location.href = "login.html";
+            return;
+          }
+
+          const content = document.getElementById("content").value;
+
+          if (!content.trim()) {
+            alert("내용을 입력해주세요.");
+            return;
+          }
+
+          const postData = {
+            text: content,
+          };
+
+          fetch("http://127.0.0.1:8080/post", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(postData),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("글 작성에 실패했습니다.");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              alert("글이 작성되었습니다!");
+              location.href = "post.html";
+            })
+            .catch((error) => {
+              console.error("글 작성 에러:", error);
+              alert("글 작성 중 오류가 발생했습니다.");
+            });
+        });
+    </script>
+  </body>
+</html>
