@@ -365,3 +365,16 @@ button:hover {
     width: 100%;
   }
 }
+
+/* p 태그 간격 키우기 */
+.login-wrapper p,
+.signup-wrapper p {
+  margin-bottom: 30px;
+}
+
+/* 로그인/회원가입 박스 크기 증가 */
+.login-wrapper,
+.signup-wrapper {
+  padding: 60px;
+  max-width: 500px;
+}
